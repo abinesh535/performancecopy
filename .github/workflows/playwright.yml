@@ -58,7 +58,7 @@ jobs:
       - name: Upload Blob Report
         uses: actions/upload-artifact@v4
 
-        if: ${{ !cancelled() }}
+        if: always()
 
         with:
           name: blob-report-${{ matrix.shard }}
@@ -70,7 +70,7 @@ jobs:
 
     runs-on: ubuntu-latest
 
-    if: ${{ !cancelled() }}
+    if: always()
 
     steps:
       - uses: actions/checkout@v4
