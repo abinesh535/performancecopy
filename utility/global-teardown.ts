@@ -37,7 +37,7 @@ export default async function globalTeardown() {
     `playwright-report/metrics-${shard}.json`,
     JSON.stringify(result, null, 2)
   );
-  await sendMail(result);
+  //await sendMail(result);
 
   cleanFolders();
 
