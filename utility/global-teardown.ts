@@ -1,4 +1,5 @@
 import fs from 'fs';
+import path from 'path';
 import { calculate, getData } from './metrices';
 import { sendMail } from './mail';
 import { cleanFolders } from './cleanup';
@@ -22,9 +23,18 @@ export default async function globalTeardown() {
   console.log(`RPS            : ${result.rps.toFixed(2)}`);
   console.log('==============================\n');
 
+   // ✅ Ensure folder exists
+  const reportDir = path.resolve('playwright-report');
+  const shard = process.env.SHARD || 'local';
+
+  if (!fs.existsSync(reportDir)) {
+    fs.mkdirSync(reportDir, { recursive: true });
+  }
+
+
   // ✅ Save JSON report
   fs.writeFileSync(
-    'playwright-report/metrics.json',
+    `playwright-report/metrics-${shard}.json`,
     JSON.stringify(result, null, 2)
   );
   await sendMail(result);
