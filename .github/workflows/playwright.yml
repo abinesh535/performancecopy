@@ -1,27 +1,103 @@
-name: Playwright Tests
+name: Playwright Parallel Tests
+
 on:
   push:
-    branches: [ main, master ]
+    branches: [main, master]
+
   pull_request:
-    branches: [ main, master ]
+    branches: [main, master]
+
+  workflow_dispatch:
+
+env:
+  TOTAL_SHARDS: 6
+
 jobs:
-  test:
-    timeout-minutes: 60
+
+  generate-matrix:
     runs-on: ubuntu-latest
+
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+
     steps:
-    - uses: actions/checkout@v4
-    - uses: actions/setup-node@v4
-      with:
-        node-version: lts/*
-    - name: Install dependencies
-      run: npm ci
-    - name: Install Playwright Browsers
-      run: npx playwright install --with-deps
-    - name: Run Playwright tests
-      run: npx playwright test
-    - uses: actions/upload-artifact@v4
-      if: ${{ !cancelled() }}
-      with:
-        name: playwright-report
-        path: playwright-report/
-        retention-days: 30
+      - id: set-matrix
+        run: |
+          echo 'matrix={"shard":[1,2,3,4,5,6]}' >> $GITHUB_OUTPUT
+
+  playwright-tests:
+    needs: generate-matrix
+
+    timeout-minutes: 60
+
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+
+      matrix: ${{ fromJson(needs.generate-matrix.outputs.matrix) }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps
+
+      - name: Run Playwright shard
+        run: |
+          npx playwright test \
+          --shard=${{ matrix.shard }}/${{ env.TOTAL_SHARDS }}
+
+      - name: Upload Blob Report
+        uses: actions/upload-artifact@v4
+
+        if: ${{ !cancelled() }}
+
+        with:
+          name: blob-report-${{ matrix.shard }}
+          path: blob-report
+          retention-days: 7
+
+  merge-reports:
+    needs: playwright-tests
+
+    runs-on: ubuntu-latest
+
+    if: ${{ !cancelled() }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Download blob reports
+        uses: actions/download-artifact@v4
+
+        with:
+          path: all-blob-reports
+
+      - name: Merge reports
+        run: |
+          npx playwright merge-reports \
+          --reporter html \
+          ./all-blob-reports
+
+      - name: Upload Final HTML Report
+        uses: actions/upload-artifact@v4
+
+        with:
+          name: playwright-report
+          path: playwright-report
+          retention-days: 30
