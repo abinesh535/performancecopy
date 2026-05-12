@@ -23,7 +23,7 @@ jobs:
     steps:
       - id: set-matrix
         run: |
-          echo 'matrix={"shard":[1,2,3,4,]}' >> $GITHUB_OUTPUT
+          echo 'matrix={"shard":[1,2,3,4]}' >> $GITHUB_OUTPUT
 
   playwright-tests:
     needs: generate-matrix
@@ -50,7 +50,7 @@ jobs:
       - name: Install Playwright Browsers
         run: npx playwright install --with-deps
 
-            - name: Run Playwright shard
+      - name: Run Playwright shard
         run: |
           npx playwright test \
           --shard=${{ matrix.shard }}/${{ env.TOTAL_SHARDS }}
