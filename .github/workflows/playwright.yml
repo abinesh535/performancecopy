@@ -108,11 +108,15 @@ jobs:
 
       - name: Merge reports
         run: |
-          find all-blob-reports -type f
+          mkdir merged-blobs
+
+          find all-blob-reports -name "*.zip" -exec cp {} merged-blobs \;
+
+          ls -la merged-blobs
 
           npx playwright merge-reports \
           --reporter html \
-          ./all-blob-reports/blob-report-*
+          ./merged-blobs
 
       - name: Upload Final HTML Report
         uses: actions/upload-artifact@v4
