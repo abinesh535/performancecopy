@@ -143,7 +143,7 @@ async function zipReport(pdfPath: string): Promise<string | null> {
 
 
 /* ================= MAIN MAIL FUNCTION ================= */
-export async function sendMail(metrics: any) {
+export async function sendMail(metrics?: any) {
 
   // logs
   const rawLog = fs.existsSync('terminal.log')

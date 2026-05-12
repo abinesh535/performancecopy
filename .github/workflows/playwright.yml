@@ -120,11 +120,11 @@ jobs:
       
       - name: Zip Playwright Report
         run: |
-        zip -r playwright-report.zip playwright-report
+         zip -r playwright-report.zip playwright-report
 
       - name: Send Email Report
         if: always()
-        run: npx ts-node ./utility/mail.ts
+        run: npx ts-node utility/send-final-mail.ts
         env:
         MAIL_USER: ${{ process.env.EMAIL_USER }}
         MAIL_PASS: ${{ process.env.EMAIL_PASS }}
