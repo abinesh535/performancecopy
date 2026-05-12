@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
 
 env:
-  TOTAL_SHARDS: 6
+  TOTAL_SHARDS: 4
 
 jobs:
 
@@ -51,6 +51,26 @@ jobs:
         run: npx playwright install --with-deps
 
       - name: Run Playwright shard
+        run: |
+          npx playwright test \
+          --shard=${{ matrix.shard }}/${{ env.TOTAL_SHARDS }}
+
+      - name: Debug folders
+        if: always()
+        run: |
+          echo "===== ROOT ====="
+          ls -la
+
+          echo "===== BLOB REPORT ====="
+           ls -la blob-report || true
+
+           echo "===== PLAYWRIGHT REPORT ====="
+           ls -la playwright-report || true
+
+
+
+
+
         run: |
           npx playwright test \
           --shard=${{ matrix.shard }}/${{ env.TOTAL_SHARDS }}

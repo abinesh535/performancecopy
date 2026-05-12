@@ -39,7 +39,7 @@ export default async function globalTeardown() {
   );
   //await sendMail(result);
 
-  cleanFolders();
+  //cleanFolders();
 
   // ✅ Clean temp file (optional)
   if (fs.existsSync('metrics-temp.json')) {
