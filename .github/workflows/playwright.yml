@@ -126,8 +126,8 @@ jobs:
         if: always()
         run: npx ts-node utility/send-final-mail.ts
         env:
-        MAIL_USER: ${{ process.env.EMAIL_USER }}
-        MAIL_PASS: ${{ process.env.EMAIL_PASS }}
+          MAIL_USER: ${{ secrets.MAIL_USER }}
+          MAIL_PASS: ${{ secrets.MAIL_PASS }}
 
       - name: Upload Final HTML Report
         uses: actions/upload-artifact@v4
