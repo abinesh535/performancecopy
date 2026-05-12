@@ -205,7 +205,7 @@ const pieBase64 = fs.readFileSync(piePath, 'base64');
         ? [
             {
               filename: 'playwright-report.zip',
-              path: zipPath,
+              path: 'playwright-report.zip',
             },
           ]
         : []),

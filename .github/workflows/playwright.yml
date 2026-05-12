@@ -117,6 +117,17 @@ jobs:
           npx playwright merge-reports \
           --reporter html \
           ./merged-blobs
+      
+      - name: Zip Playwright Report
+        run: |
+        zip -r playwright-report.zip playwright-report
+
+      - name: Send Email Report
+        if: always()
+        run: npx ts-node ./utility/mail.ts
+        env:
+        MAIL_USER: ${{ process.env.EMAIL_USER }}
+        MAIL_PASS: ${{ process.env.EMAIL_PASS }}
 
       - name: Upload Final HTML Report
         uses: actions/upload-artifact@v4
