@@ -42,7 +42,7 @@ export default async function globalTeardown() {
   //cleanFolders();
 
   // ✅ Clean temp file (optional)
-  if (fs.existsSync('metrics-temp.json')) {
-    fs.unlinkSync('metrics-temp.json');
-  }
-}
+//   if (fs.existsSync('metrics-temp.json')) {
+//     fs.unlinkSync('metrics-temp.json');
+//   }
+ }
