@@ -183,12 +183,14 @@ if (piePath && fs.existsSync(piePath)) {
     : [];
 
   // PDF
-  const pdfPath = await generatePDF(
+  let pdfPath = '';
+
+if (metrics) { pdfPath = await generatePDF(
     metrics,
     { bar: barChart, pie: pieChart },
     screenshots,
     rawLog
-  );
+  )};
    await new Promise(res => setTimeout(res, 3000));
   // ZIP playwright report
   const zipPath = await zipReport(pdfPath);
