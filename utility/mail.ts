@@ -151,7 +151,14 @@ export async function sendMail(metrics?: any) {
     : '';
 
   // chart
-  const { barPath, piePath } = await generateChart(metrics);
+let barPath = '';
+let piePath = '';
+
+if (metrics) {
+  const charts = await generateChart(metrics);
+  barPath = charts.barPath;
+  piePath = charts.piePath;
+}
 const barBase64 = fs.readFileSync(barPath, 'base64');
 const pieBase64 = fs.readFileSync(piePath, 'base64');
 
