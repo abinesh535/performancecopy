@@ -135,7 +135,7 @@ jobs:
           --reporter html \
           ./merged-blobs
       
-      - name: Merge Metrics
+      - name: Merge Metrices
         run: |
           npx ts-node utility/merge-metrices.ts
       
