@@ -159,8 +159,19 @@ if (metrics) {
   barPath = charts.barPath;
   piePath = charts.piePath;
 }
-const barBase64 = fs.readFileSync(barPath, 'base64');
-const pieBase64 = fs.readFileSync(piePath, 'base64');
+// const barBase64 = fs.readFileSync(barPath, 'base64');
+// const pieBase64 = fs.readFileSync(piePath, 'base64');
+
+let barChart = '';
+let pieChart = '';
+
+if (barPath && fs.existsSync(barPath)) {
+  barChart = fs.readFileSync(barPath).toString('base64');
+}
+
+if (piePath && fs.existsSync(piePath)) {
+  pieChart = fs.readFileSync(piePath).toString('base64');
+}
 
   // screenshots
   const screenshotDir = path.resolve('screenshots');
@@ -174,7 +185,7 @@ const pieBase64 = fs.readFileSync(piePath, 'base64');
   // PDF
   const pdfPath = await generatePDF(
     metrics,
-    { bar: barBase64, pie: pieBase64 },
+    { bar: barChart, pie: pieChart },
     screenshots,
     rawLog
   );
