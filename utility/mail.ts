@@ -203,6 +203,11 @@ if (metrics) { pdfPath = await generatePDF(
     },
   });
 
+  const reportUrl =
+  `${process.env.GITHUB_SERVER_URL}/` +
+  `${process.env.GITHUB_REPOSITORY}/actions/runs/` +
+  `${process.env.GITHUB_RUN_ID}`;
+
   await transporter.sendMail({
     from: process.env.MAIL_USER,
     to: [
@@ -218,6 +223,9 @@ if (metrics) { pdfPath = await generatePDF(
         <li>PDF Summary Report</li>
         <li>Playwright HTML Report (ZIP)</li>
       </ul>
+      <a href="${reportUrl}">
+    Open GitHub Actions Report
+     </a>
     `,
 
     attachments: [
