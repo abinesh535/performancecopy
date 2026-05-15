@@ -26,6 +26,10 @@ function append(entry: any) {
 }
 
 /* ================= RECORD FUNCTIONS ================= */
+export function recordRequest( userId: number) {
+  append({ type: 'request',userId });
+}
+
 
 export function recordTime(ms: number, userId: number) {
   append({ type: 'time', value: ms, userId });
@@ -72,6 +76,11 @@ export function getData(): MetricsData {
         requests: 0,
       };
     }
+
+     if (entry.type === 'request') {
+  data.requests++;
+  data.users[userId].requests++;
+}
 
     if (entry.type === 'time') {
       data.times.push(entry.value);
@@ -125,7 +134,7 @@ export async function calculate(data: MetricsData) {
 
   // ✅ Better RPS (based on total time)
   const totalTimeSec = times.length
-    ? times.reduce((a, b) => a + b, 0) / 1000
+    ? Math.max(...times) / 1000
     : 1;
 
   const rps = totalRequests / totalTimeSec;
