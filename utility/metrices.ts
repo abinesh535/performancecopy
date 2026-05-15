@@ -5,12 +5,14 @@ const FILE = 'metrics-temp.json';
 /* ================= TYPES ================= */
 
 type UserMetrics = {
+  requests: number;
   times: number[];
   errors: number;
   timeouts: number;
 };
 
 type MetricsData = {
+  requests: number;
   times: number[];
   errors: number;
   timeouts: number;
@@ -41,7 +43,7 @@ export function recordTimeout(userId: number) {
 
 export function getData(): MetricsData {
   if (!fs.existsSync(FILE)) {
-    return { times: [], errors: 0, timeouts: 0, users: {} };
+    return {requests: 0, times: [], errors: 0, timeouts: 0, users: {} };
   }
 
   const lines = fs.readFileSync(FILE, 'utf-8')
@@ -50,6 +52,7 @@ export function getData(): MetricsData {
     .filter(Boolean);
 
   const data: MetricsData = {
+    requests: 0,
     times: [],
     errors: 0,
     timeouts: 0,
@@ -66,6 +69,7 @@ export function getData(): MetricsData {
         times: [],
         errors: 0,
         timeouts: 0,
+        requests: 0,
       };
     }
 
@@ -82,6 +86,10 @@ export function getData(): MetricsData {
     if (entry.type === 'timeout') {
       data.timeouts++;
       data.users[userId].timeouts++;
+
+      // ALSO mark failure
+  data.errors++;
+  data.users[userId].errors++;
     }
   }
 
@@ -95,7 +103,7 @@ export async function calculate(data: MetricsData) {
   const sorted = [...times].sort((a, b) => a - b);
 
   // ✅ FIXED total requests
-  const totalRequests = times.length ;
+  const totalRequests = data.requests;
 
   const avg = times.length
     ? times.reduce((a, b) => a + b, 0) / times.length
@@ -127,13 +135,13 @@ export async function calculate(data: MetricsData) {
     : 0;
 
   const successRate = totalRequests
-    ? (times.length / totalRequests) * 100
+    ? ((totalRequests - data.errors) / totalRequests) * 100
     : 0;
 
   /* ================= PER USER METRICS ================= */
 
   const users = Object.entries(data.users).map(([userId, u]) => {
-    const userRequests = u.times.length + u.errors + u.timeouts;
+    const userRequests = u.requests;
 
     const userAvg = u.times.length
       ? u.times.reduce((a, b) => a + b, 0) / u.times.length
