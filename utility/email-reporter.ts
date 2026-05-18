@@ -9,6 +9,7 @@ export default class EmailReporter implements Reporter {
     const data = getData();
     const metrics = await calculate(data);
 
+    
     try {
       await sendMail(metrics);
       console.log('✅ Report email sent from EmailReporter');
