@@ -234,7 +234,7 @@ export async function generateSummaryPDF() {
   await page.goto('file://' + process.cwd() + '/utility/summary.html');
 
   await page.pdf({
-    path: 'summary-final.pdf',
+    path: 'playwright-report/summary.pdf',
     format: 'A4',
     printBackground: true
   });
