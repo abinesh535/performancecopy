@@ -129,8 +129,8 @@ async function zipReport(pdfPath: string): Promise<string | null> {
     if (fs.existsSync(pdfPath)) {
       archive.file(pdfPath, { name: 'summary.pdf' });
     }
-     const screenshotDir = path.resolve('screenshots');
-     if (fs.existsSync(screenshotDir)) {
+    const screenshotDir = path.resolve('screenshots');
+    if (fs.existsSync(screenshotDir)) {
       archive.directory(screenshotDir, 'screenshots');
     }
 
@@ -151,47 +151,49 @@ export async function sendMail(metrics?: any) {
     : '';
 
   // chart
-let barPath = '';
-let piePath = '';
+  let barPath = '';
+  let piePath = '';
 
-if (metrics) {
-  const charts = await generateChart(metrics);
-  barPath = charts.barPath;
-  piePath = charts.piePath;
-}
-// const barBase64 = fs.readFileSync(barPath, 'base64');
-// const pieBase64 = fs.readFileSync(piePath, 'base64');
+  if (metrics) {
+    const charts = await generateChart(metrics);
+    barPath = charts.barPath;
+    piePath = charts.piePath;
+  }
+  // const barBase64 = fs.readFileSync(barPath, 'base64');
+  // const pieBase64 = fs.readFileSync(piePath, 'base64');
 
-let barChart = '';
-let pieChart = '';
+  let barChart = '';
+  let pieChart = '';
 
-if (barPath && fs.existsSync(barPath)) {
-  barChart = fs.readFileSync(barPath).toString('base64');
-}
+  if (barPath && fs.existsSync(barPath)) {
+    barChart = fs.readFileSync(barPath).toString('base64');
+  }
 
-if (piePath && fs.existsSync(piePath)) {
-  pieChart = fs.readFileSync(piePath).toString('base64');
-}
+  if (piePath && fs.existsSync(piePath)) {
+    pieChart = fs.readFileSync(piePath).toString('base64');
+  }
 
   // screenshots
   const screenshotDir = path.resolve('screenshots');
   const screenshots = fs.existsSync(screenshotDir)
     ? fs.readdirSync(screenshotDir).map(file => ({
-        name: file,
-        base64: fs.readFileSync(path.join(screenshotDir, file), 'base64'),
-      }))
+      name: file,
+      base64: fs.readFileSync(path.join(screenshotDir, file), 'base64'),
+    }))
     : [];
 
   // PDF
   let pdfPath = '';
 
-if (metrics) { pdfPath = await generatePDF(
-    metrics,
-    { bar: barChart, pie: pieChart },
-    screenshots,
-    rawLog
-  )};
-   await new Promise(res => setTimeout(res, 3000));
+  if (metrics) {
+    pdfPath = await generatePDF(
+      metrics,
+      { bar: barChart, pie: pieChart },
+      screenshots,
+      rawLog
+    )
+  };
+  await new Promise(res => setTimeout(res, 3000));
   // ZIP playwright report
   const zipPath = await zipReport(pdfPath);
 
@@ -204,16 +206,16 @@ if (metrics) { pdfPath = await generatePDF(
   });
 
   const reportUrl =
-  `${process.env.GITHUB_SERVER_URL}/` +
-  `${process.env.GITHUB_REPOSITORY}/actions/runs/` +
-  `${process.env.GITHUB_RUN_ID}`;
+    `${process.env.GITHUB_SERVER_URL}/` +
+    `${process.env.GITHUB_REPOSITORY}/actions/runs/` +
+    `${process.env.GITHUB_RUN_ID}`;
 
   await transporter.sendMail({
     from: process.env.MAIL_USER,
     to: [
-  'agrant@kanrad.com'
-  // 'rsimmons@kanrad.com'
-].join(','),
+      'agrant@kanrad.com'
+      // 'rsimmons@kanrad.com'
+    ].join(','),
     subject: '📊 Test Execution Report',
 
     html: `
@@ -231,11 +233,11 @@ if (metrics) { pdfPath = await generatePDF(
     attachments: [
       ...(zipPath
         ? [
-            {
-              filename: 'playwright-report.zip',
-              path: 'playwright-report.zip',
-            },
-          ]
+          {
+            filename: 'playwright-report.zip',
+            path: 'playwright-report.zip',
+          },
+        ]
         : []),
     ],
   });
