@@ -11,51 +11,64 @@ dotenv.config({ path: '.env.config' });
 const ROOT = path.resolve(__dirname, '..');
 
 /* ================= ZIP REPORT ================= */
-async function zipReport(pdfPath: string | null): Promise<string | null> {
-  const reportDir = path.join(ROOT, 'playwright-report');
-  const zipPath = path.join(ROOT, 'playwright-report.zip');
-  const indexPath = path.join(reportDir, 'index.html');
+async function zipReport(
+  pdfPath: string | null
+): Promise<string | null> {
 
-  if (!fs.existsSync(indexPath)) {
-    console.log('❌ index.html not found at', indexPath);
-    return null;
-  }
+  const zipPath =
+    path.join(ROOT, 'playwright-report.zip');
 
   if (fs.existsSync(zipPath)) {
     fs.unlinkSync(zipPath);
   }
 
   return new Promise((resolve, reject) => {
-    const output = fs.createWriteStream(zipPath);
-    const archive = archiver('zip', { zlib: { level: 9 } });
+
+    const output =
+      fs.createWriteStream(zipPath);
+
+    const archive = archiver('zip', {
+      zlib: { level: 9 }
+    });
 
     archive.on('error', err => reject(err));
+
     output.on('close', () => {
       console.log(`✅ Created zip: ${zipPath}`);
       resolve(zipPath);
     });
 
     archive.pipe(output);
-    archive.directory(reportDir, false, entry => {
-      const name = entry.name || '';
-      if (
-        name.endsWith('latency-chart.png') ||
-        name.endsWith('pass-fail-chart.png') ||
-        /^metrics-.*\.json$/.test(name) ||
-        name.endsWith('summary.pdf')
-      ) {
-        return false;
-      }
-      return entry;
-    });
 
-    if (pdfPath && fs.existsSync(pdfPath)) {
-      archive.file(pdfPath, { name: 'summary.pdf' });
+    /* ✅ ONLY index.html */
+    const htmlReport =
+      path.join(ROOT, 'playwright-report', 'index.html');
+
+    if (fs.existsSync(htmlReport)) {
+
+      archive.file(htmlReport, {
+        name: 'index.html'
+      });
     }
 
-    const screenshotDir = path.resolve('screenshots');
+    /* ✅ PDF with charts */
+    if (pdfPath && fs.existsSync(pdfPath)) {
+
+      archive.file(pdfPath, {
+        name: 'summary.pdf'
+      });
+    }
+
+    /* ✅ Screenshots only */
+    const screenshotDir =
+      path.join(ROOT, 'screenshots');
+
     if (fs.existsSync(screenshotDir)) {
-      archive.directory(screenshotDir, 'screenshots');
+
+      archive.directory(
+        screenshotDir,
+        'screenshots'
+      );
     }
 
     archive.finalize();
@@ -96,7 +109,18 @@ export async function sendMail(metrics?: any) {
   }
 
   // Create zip of playwright report
-  const zipPath = await zipReport(pdfPath);
+let zipPath: string;
+
+if (process.env.GITHUB_ACTIONS) {
+
+  // ✅ GitHub already created lightweight zip
+  zipPath = path.join(ROOT, 'playwright-report.zip');
+
+} else {
+
+  // ✅ Local VS Code execution
+  zipPath = await zipReport(pdfPath) as string;
+}
 
   const transporter = nodemailer.createTransport({
     service: 'gmail',
