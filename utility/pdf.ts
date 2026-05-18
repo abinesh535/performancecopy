@@ -200,7 +200,7 @@ ${pieChartHtml}
 <h2>Conclusion</h2>
 <div class="card">
   System performance under concurrent load is 
-  <b>${metrics.errorRate > 5 ? 'STABLE' : 'ACCEPTABLE'}</b>.
+  <b>${metrics.errorRate > 5 ? 'UNSTABLE' : 'STABLE'}</b>.
   <br><br>
 </div>
 

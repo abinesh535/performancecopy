@@ -21,7 +21,7 @@ async function waitForReportHtml(reportDir: string, timeoutMs = 10000) {
     await new Promise(resolve => setTimeout(resolve, 500));
   }
 
-  console.warn('⚠️ Timeout waiting for playwright-report/index.html to become available');
+  console.warn('⚠️ waiting for playwright-report/index.html to become available');
 }
 
 const ROOT = path.resolve(__dirname, '..');
