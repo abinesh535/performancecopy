@@ -25,8 +25,7 @@ export default defineConfig({
    reporter: [
   ['blob'],
   ['html'],
-  ['list'],
-  ['./utility/email-reporter.ts']
+  ['list']
 ],
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   globalTeardown: require.resolve('./utility/global-teardown'),
