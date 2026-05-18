@@ -18,7 +18,7 @@ function walk(dir: string) {
       walk(full);
     }
 
-    else if (file === 'metrics-temp.json') {
+    else if (/^metrics-.*\.json$/.test(file)) {
 
       merged +=
         fs.readFileSync(full, 'utf-8') + '\n';

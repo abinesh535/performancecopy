@@ -78,14 +78,14 @@ jobs:
           path: blob-report
           retention-days: 7
 
-      - name: Upload Metrices
+      - name: Upload Metrics
         uses: actions/upload-artifact@v4
 
         if: always()
 
         with:
           name: metrics-${{ matrix.shard }}
-          path: metrics-temp.json
+          path: playwright-report/metrics-${{ matrix.shard }}.json
           retention-days: 7
 
   merge-reports:
@@ -111,7 +111,7 @@ jobs:
         with:
           path: all-blob-reports
 
-      - name: Download Metrices
+      - name: Download Metrics
         uses: actions/download-artifact@v4
 
         with:
@@ -135,7 +135,7 @@ jobs:
           --reporter html \
           ./merged-blobs
       
-      - name: Merge Metrices
+      - name: Merge Metrics
         run: |
           npx ts-node utility/merge-metrices.ts
       
@@ -145,7 +145,7 @@ jobs:
 
       - name: Send Email Report
         if: always()
-        run: npx ts-node utility/send-final-mail.ts
+        run: npx ts-node utility/mail.ts
         env:
           MAIL_USER: ${{ secrets.MAIL_USER }}
           MAIL_PASS: ${{ secrets.MAIL_PASS }}
