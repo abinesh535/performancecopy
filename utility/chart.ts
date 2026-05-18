@@ -85,5 +85,13 @@ const total = pass + fail;
   fs.writeFileSync(barPath, barBuffer);
   fs.writeFileSync(piePath, pieBuffer);
 
-  return { barPath, piePath };
+  const barDataUrl = `data:image/png;base64,${barBuffer.toString('base64')}`;
+  const pieDataUrl = `data:image/png;base64,${pieBuffer.toString('base64')}`;
+
+  return {
+    bar: barDataUrl,
+    pie: pieDataUrl,
+    barPath,
+    piePath,
+  };
 }

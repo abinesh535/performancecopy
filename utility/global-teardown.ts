@@ -7,6 +7,25 @@ import { execSync } from 'child_process';
 
 
 
+async function waitForReportHtml(reportDir: string, timeoutMs = 10000) {
+  const indexPath = path.join(reportDir, 'index.html');
+  const start = Date.now();
+
+  while (Date.now() - start < timeoutMs) {
+    if (fs.existsSync(indexPath)) {
+      const stat = fs.statSync(indexPath);
+      if (stat.size > 0) {
+        return;
+      }
+    }
+    await new Promise(resolve => setTimeout(resolve, 500));
+  }
+
+  console.warn('⚠️ Timeout waiting for playwright-report/index.html to become available');
+}
+
+const ROOT = path.resolve(__dirname, '..');
+
 export default async function globalTeardown() {
   const data = getData();
   const result = await calculate(data);
@@ -24,20 +43,22 @@ export default async function globalTeardown() {
   console.log('==============================\n');
 
    // ✅ Ensure folder exists
-  const reportDir = path.resolve('playwright-report');
+  const reportDir = path.join(ROOT, 'playwright-report');
   const shard = process.env.SHARD || 'local';
 
   if (!fs.existsSync(reportDir)) {
     fs.mkdirSync(reportDir, { recursive: true });
   }
 
+  await waitForReportHtml(reportDir, 15000);
 
   // ✅ Save JSON report
   fs.writeFileSync(
-    `playwright-report/metrics-${shard}.json`,
+    path.join(reportDir, `metrics-${shard}.json`),
     JSON.stringify(result, null, 2)
   );
-  //await sendMail(result);
+
+  console.log('ℹ️ Report data saved. Email will be sent by the Playwright reporter.');
 
   //cleanFolders();
 

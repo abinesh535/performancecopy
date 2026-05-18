@@ -43,6 +43,12 @@ export function recordTimeout(userId: number) {
   append({ type: 'timeout', userId });
 }
 
+export function resetMetrics() {
+  if (fs.existsSync(FILE)) {
+    fs.unlinkSync(FILE);
+  }
+}
+
 /* ================= READ + BUILD DATA ================= */
 
 export function getData(): MetricsData {

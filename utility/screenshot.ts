@@ -10,9 +10,13 @@ export async function captureFailure(page: Page, userIndex: number, reason: stri
       fs.mkdirSync(dir, { recursive: true });
     }
 
-    const fileName = `user-${userIndex + 1}-${reason}-${Date.now()}.png`;
+    const fileName = `user-${userIndex + 1}-${reason}.png`;
 
     const filePath = path.join(dir, fileName);
+
+    if (fs.existsSync(filePath)) {
+      fs.unlinkSync(filePath);
+    }
 
     await page.screenshot({
       path: filePath,

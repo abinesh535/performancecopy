@@ -1,19 +1,35 @@
+import fs from 'fs';
+import path from 'path';
 import { test } from '@playwright/test';
 import { faker } from '@faker-js/faker';
 import { retryStep } from '../utility/retry';
 import { runTimesheetFlow } from '../pages/timesheet';
 import { captureFailure } from '../utility/screenshot';
 
+const screenshotDir = path.resolve('screenshots');
+if (fs.existsSync(screenshotDir)) {
+  fs.rmSync(screenshotDir, { recursive: true, force: true });
+  console.log('🧹 Cleared stale screenshots before test run');
+}
+
 const usedAuthNumbers = new Set<string>();
+
+const reportDir = path.resolve('playwright-report');
+if (fs.existsSync(reportDir)) {
+  fs.rmSync(reportDir, { recursive: true, force: true });
+  console.log('🧹 Cleared stale playwright-report before test run');
+}
 
 import {
   recordRequest,
   recordTime as fileRecordTime,
   recordError as fileRecordError,
   recordTimeout as fileRecordTimeout,
-  getData,
-  calculate
+  resetMetrics
 } from '../utility/metrices';
+
+// reset stale metrics from previous runs
+resetMetrics();
 
 // 📊 Global Metrics
 // 📊 Global Metrics
@@ -250,6 +266,7 @@ test('concurrent login with metrics', async ({ browser }) => {
         const message = (await toast.last().textContent())?.trim();
 
         if (message?.includes('successfully')) {
+          success = true;
           console.log(`User ${i + 1} ✅ Authorization Saved`);
         }
 
@@ -273,11 +290,16 @@ test('concurrent login with metrics', async ({ browser }) => {
 
       await runTimesheetFlow(page);
 
-      // ✅ Mark success
-      success = true;
+      // ✅ Mark success only if no error paths occurred
+      if (success) {
+        console.log(`User ${i + 1} ✅ Workflow completed successfully`);
+      } else {
+        console.log(`User ${i + 1} ❌ Workflow completed but authorization was not confirmed`);
+      }
 
     } catch (e: any) {
 
+      success = false;
       await captureFailure(page, i, 'main-error');
 
       if (e.message.includes('Timeout')) {

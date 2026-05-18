@@ -45,6 +45,20 @@ export async function generatePDF(
     `
     : '';
 
+const barChartHtml = charts.bar
+  ? `
+  <h2>Latency Distribution</h2>
+  <img src="${charts.bar}" width="100%"/>
+  `
+  : '';
+
+const pieChartHtml = charts.pie
+  ? `
+  <h2>Success vs Failure</h2>
+  <img src="${charts.pie}" width="60%"/>
+  `
+  : '';
+
 const html = `
 <html>
 <head>
@@ -179,11 +193,9 @@ const html = `
 
 ${userSection}
 
-<h2>Latency Distribution</h2>
-<img src="data:image/png;base64,${charts.bar}" width="100%"/>
+${barChartHtml}
 
-<h2>Success vs Failure</h2>
-<img src="data:image/png;base64,${charts.pie}" width="60%"/>
+${pieChartHtml}
 
 <h2>Conclusion</h2>
 <div class="card">
@@ -202,7 +214,13 @@ ${userSection}
 
   const filePath = path.resolve('playwright-report/summary.pdf');
 
+  await page.setViewportSize({
+  width: 1400,
+  height: 2000
+});
+
   await page.setContent(html);
+  await page.waitForLoadState('networkidle');
   await page.pdf({ path: filePath, format: 'A4', printBackground: true });
 
   await browser.close();
