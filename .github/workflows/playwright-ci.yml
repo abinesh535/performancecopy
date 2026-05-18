@@ -141,7 +141,7 @@ jobs:
       
       - name: Zip Playwright Report
         run: |
-         zip -r playwright-report.zip playwright-report
+         zip -r playwright-report.zip playwright-report -x "*.webm"
 
       - name: Send Email Report
         if: always()
