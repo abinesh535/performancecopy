@@ -174,15 +174,21 @@ jobs:
       # ✅ Create lightweight mail ZIP
       - name: Create Mail Report ZIP
         run: |
-          mkdir mail-report
 
-          cp playwright-report/index.html mail-report/ || true
+          rm -rf mail-report
+          rm -f playwright-report.zip
 
-          cp playwright-report/summary.pdf mail-report/ || true
+          mkdir -p mail-report
+
+          cp playwright-report/index.html mail-report/index.html || true
+
+          cp playwright-report/summary.pdf mail-report/summary.pdf || true
 
           cp -r screenshots mail-report/screenshots || true
 
-          zip -r playwright-report.zip mail-report
+          cd mail-report
+
+          zip -r ../playwright-report.zip .
 
       # ✅ Upload lightweight ZIP artifact
       - name: Upload Mail Report ZIP
