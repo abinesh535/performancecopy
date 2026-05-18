@@ -68,6 +68,11 @@ export async function sendMail(metrics?: any) {
   const mailPass = process.env.MAIL_PASS ? process.env.MAIL_PASS.replace(/\s+/g, '') : undefined;
   const mailTo = process.env.MAIL_TO || 'agrant@kanrad.com';
 
+  const githubRunUrl =
+  `${process.env.GITHUB_SERVER_URL}/` +
+  `${process.env.GITHUB_REPOSITORY}/actions/runs/` +
+  `${process.env.GITHUB_RUN_ID}`;
+
   if (!mailUser || !mailPass) {
     throw new Error('MAIL_USER and MAIL_PASS must be set for email sending');
   }
@@ -137,6 +142,15 @@ export async function sendMail(metrics?: any) {
         <li>PDF Summary Report</li>
         <li>Playwright HTML Report (ZIP)</li>
       </ul>
+
+       <p>
+    Full execution artifacts including videos,
+    traces, and detailed reports can be accessed here:
+  </p>
+
+  <a href="${githubRunUrl}">
+    Open GitHub Actions Run
+  </a>
     `,
     attachments,
   };

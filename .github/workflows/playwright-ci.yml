@@ -38,6 +38,7 @@ jobs:
       matrix: ${{ fromJson(needs.generate-matrix.outputs.matrix) }}
 
     steps:
+
       - uses: actions/checkout@v4
 
       - uses: actions/setup-node@v4
@@ -53,6 +54,7 @@ jobs:
       - name: Run Playwright shard
         run: |
           echo "Running shard ${{ matrix.shard }}/${{ env.TOTAL_SHARDS }}"
+
           npx playwright test \
           --shard=${{ matrix.shard }}/${{ env.TOTAL_SHARDS }}
 
@@ -67,6 +69,9 @@ jobs:
 
           echo "===== PLAYWRIGHT REPORT ====="
           ls -la playwright-report || true
+
+          echo "===== SCREENSHOTS ====="
+          ls -la screenshots || true
 
       - name: Upload Blob Report
         uses: actions/upload-artifact@v4
@@ -88,6 +93,16 @@ jobs:
           path: playwright-report/metrics-${{ matrix.shard }}.json
           retention-days: 7
 
+      - name: Upload Screenshots
+        uses: actions/upload-artifact@v4
+
+        if: always()
+
+        with:
+          name: screenshots-${{ matrix.shard }}
+          path: screenshots
+          retention-days: 7
+
   merge-reports:
     needs: playwright-tests
 
@@ -96,6 +111,7 @@ jobs:
     if: always()
 
     steps:
+
       - uses: actions/checkout@v4
 
       - uses: actions/setup-node@v4
@@ -118,10 +134,20 @@ jobs:
           pattern: metrics-*
           path: all-metrics
 
+      - name: Download Screenshots
+        uses: actions/download-artifact@v4
+
+        with:
+          pattern: screenshots-*
+          path: screenshots
+
       - name: Debug downloaded reports
         run: |
           echo "===== DOWNLOADED REPORTS ====="
           find all-blob-reports
+
+          echo "===== DOWNLOADED SCREENSHOTS ====="
+          find screenshots || true
 
       - name: Merge reports
         run: |
@@ -132,16 +158,49 @@ jobs:
           ls -la merged-blobs
 
           npx playwright merge-reports \
-          --reporter html \
-          ./merged-blobs
-      
+            --reporter html \
+            ./merged-blobs
+
       - name: Merge Metrics
         run: |
+          mkdir -p all-metrics
+
           npx ts-node utility/merge-metrices.ts
-      
-      - name: Zip Playwright Report
+
+      - name: Generate PDF Summary
         run: |
-         zip -r playwright-report.zip playwright-report -x "*.webm"
+          npx ts-node utility/pdf.ts
+
+      # ✅ Create lightweight mail ZIP
+      - name: Create Mail Report ZIP
+        run: |
+          mkdir mail-report
+
+          cp playwright-report/index.html mail-report/ || true
+
+          cp playwright-report/summary.pdf mail-report/ || true
+
+          cp -r screenshots mail-report/screenshots || true
+
+          zip -r playwright-report.zip mail-report
+
+      # ✅ Upload lightweight ZIP artifact
+      - name: Upload Mail Report ZIP
+        uses: actions/upload-artifact@v4
+
+        with:
+          name: playwright-report-mail
+          path: playwright-report.zip
+          retention-days: 30
+
+      # ✅ Upload FULL report separately
+      - name: Upload Full HTML Report
+        uses: actions/upload-artifact@v4
+
+        with:
+          name: playwright-report-full
+          path: playwright-report
+          retention-days: 30
 
       - name: Send Email Report
         if: always()
