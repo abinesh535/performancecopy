@@ -175,20 +175,36 @@ jobs:
       - name: Create Mail Report ZIP
         run: |
 
+          echo "===== CLEANING ====="
+
           rm -rf mail-report
           rm -f playwright-report.zip
 
           mkdir -p mail-report
 
-          cp playwright-report/index.html mail-report/index.html || true
+          echo "===== COPYING FILES ====="
 
-          cp playwright-report/summary.pdf mail-report/summary.pdf || true
+          cp playwright-report/index.html mail-report/index.html
+
+          cp playwright-report/summary.pdf mail-report/summary.pdf
 
           cp -r screenshots mail-report/screenshots || true
+
+          echo "===== MAIL REPORT CONTENT ====="
+
+          find mail-report
+
+          echo "===== CREATING ZIP ====="
 
           cd mail-report
 
           zip -r ../playwright-report.zip .
+
+          cd ..
+
+          echo "===== ZIP CONTENT ====="
+
+          unzip -l playwright-report.zip
 
       # ✅ Upload lightweight ZIP artifact
       - name: Upload Mail Report ZIP
