@@ -6,6 +6,12 @@ const outputFile = 'metrics-temp.json';
 
 let merged = '';
 
+if (!fs.existsSync(metricsDir)) {
+  fs.mkdirSync(metricsDir, { recursive: true });
+
+  console.log(`⚠️ Created missing folder: ${metricsDir}`);
+}
+
 function walk(dir: string) {
 
   const files = fs.readdirSync(dir);
