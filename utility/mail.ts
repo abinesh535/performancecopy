@@ -176,7 +176,10 @@ async function main() {
 }
 
 // Run if executed directly
-if (require.main === module) {
+if (
+  require.main === module &&
+  process.env.GITHUB_JOB !== 'playwright-tests'
+) {
   main();
 }
 
