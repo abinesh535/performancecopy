@@ -2,6 +2,7 @@
 import { chromium } from 'playwright';
 import fs from 'fs';
 import path from 'path';
+import { generateChart } from './chart';
 
 export async function generatePDF(
   metrics: any,
@@ -228,18 +229,34 @@ ${pieChartHtml}
 }
 
 export async function generateSummaryPDF() {
-  const browser = await chromium.launch();
-  const page = await browser.newPage();
 
-  await page.goto('file://' + process.cwd() + '/utility/summary.html');
+  const metrics =
+    JSON.parse(
+      fs.readFileSync('metrics-temp.json', 'utf-8')
+    );
 
-  await page.pdf({
-    path: 'playwright-report/summary.pdf',
-    format: 'A4',
-    printBackground: true
-  });
+  const charts =
+    await generateChart(metrics);
 
-  await browser.close();
+  await generatePDF(
+    metrics,
+    charts,
+    [],
+    ''
+  );
 
   console.log('✅ Summary PDF generated');
+}
+
+ if (require.main === module) {
+
+  generateSummaryPDF()
+    .then(() => {
+      console.log('✅ PDF generation completed');
+    })
+    .catch(err => {
+      console.error(err);
+
+      process.exit(1);
+    });
 }
